@@ -1,0 +1,10 @@
+^C:\DEVELOPERCPP\HW_CPP\HW2\BUILD\CMAKEFILES\F1F10F75EDAEB1664929C691287BEA3C\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/DeveloperCpp/HW_Cpp/hw2 -BC:/DeveloperCpp/HW_Cpp/hw2/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/DeveloperCpp/HW_Cpp/hw2/build/hw2.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
