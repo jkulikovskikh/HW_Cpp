@@ -17,11 +17,14 @@ class Ball {
         Point getCenter() const;
         double getRadius() const;
         double getMass() const;
+        void setCollidable(const bool& isCollidable);
+        bool getCollidable() const;
     
     private:
         Point center;
         Velocity velocity;
         double radius;
         Color color;
+        bool isCollidable;
     };
     

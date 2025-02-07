@@ -70,3 +70,12 @@ double Ball::getRadius() const {
 double Ball::getMass() const {
     return M_PI * std::powf(getRadius(), 3) * 4. / 3;
 }
+
+void Ball::setCollidable(const bool& isCollidable){
+    this->isCollidable = isCollidable;
+}
+
+
+bool Ball::getCollidable() const{
+    return this->isCollidable;
+}
