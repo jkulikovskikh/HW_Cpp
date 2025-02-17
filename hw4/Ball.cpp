@@ -6,6 +6,7 @@ Ball::Ball() = default;
 Ball::Ball(double radius, Color color) {
     this->radius = radius;
     this->color = color;
+    this->mass =  M_PI * std::pow(getRadius(), 3) * 4. / 3;
 }
     
 /**
@@ -20,7 +21,7 @@ void Ball::setVelocity(const Velocity& velocity) {
  * @return скорость объекта
  */
 Velocity Ball::getVelocity() const {
-    return this->velocity;
+    return velocity;
 }
 
 /**
@@ -32,7 +33,8 @@ Velocity Ball::getVelocity() const {
  * @param painter контекст отрисовки
  */
 void Ball::draw(Painter& painter) const {
-    painter.draw(Ball::getCenter(), Ball::getRadius(), Color::Color());
+    painter.draw(getCenter(), getRadius(), Color(color.red(), color.green(), color.blue()));
+
 }
 
 /**
@@ -48,7 +50,7 @@ void Ball::setCenter(const Point& center) {
  * @return центр объекта
  */
 Point Ball::getCenter() const {
-    return this->center;
+    return center;
 }
 
 /**
@@ -57,7 +59,7 @@ Point Ball::getCenter() const {
  * не требуется
  */
 double Ball::getRadius() const {
-    return this->radius;
+    return radius;
 }
 
 /**
@@ -68,14 +70,14 @@ double Ball::getRadius() const {
  * эквивалентна объему: PI * radius^3 * 4. / 3.
  */
 double Ball::getMass() const {
-    return M_PI * std::powf(getRadius(), 3) * 4. / 3;
+    return mass;
 }
 
-void Ball::setCollidable(const bool& isCollidable){
+void Ball::setCollidable(bool isCollidable){
     this->isCollidable = isCollidable;
 }
 
 
 bool Ball::getCollidable() const{
-    return this->isCollidable;
+    return isCollidable;
 }

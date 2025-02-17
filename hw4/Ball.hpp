@@ -2,13 +2,12 @@
 #include "Painter.hpp"
 #include "Point.hpp"
 #include "Velocity.hpp"
-#include "corecrt_math_defines.h"
 
 class Ball {
     public:
     
         Ball();
-        Ball::Ball(double radius, Color color);
+        Ball(double radius, Color color);
     
         void setVelocity(const Velocity& velocity);
         Velocity getVelocity() const;
@@ -17,7 +16,7 @@ class Ball {
         Point getCenter() const;
         double getRadius() const;
         double getMass() const;
-        void setCollidable(const bool& isCollidable);
+        void setCollidable(bool isCollidable);
         bool getCollidable() const;
     
     private:
@@ -26,5 +25,6 @@ class Ball {
         double radius;
         Color color;
         bool isCollidable;
+        double mass;
     };
     
