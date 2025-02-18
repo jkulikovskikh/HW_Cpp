@@ -26,6 +26,9 @@ void Physics::collideBalls(std::vector<Ball>& balls) const {
             continue;
         }
         for (auto b = std::next(a); b != balls.end(); ++b) {
+            if (b->getCollidable() == false) {
+                continue;
+            }
             const double distanceBetweenCenters2 =
                 distance2(a->getCenter(), b->getCenter());
             const double collisionDistance = a->getRadius() + b->getRadius();
