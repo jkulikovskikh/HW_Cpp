@@ -23,6 +23,8 @@ public:
 	}
 
 	double eval() const override {
+		if (m_min == std::numeric_limits<double>::max())
+			return -1;
 		return m_min;
 	}
 
@@ -47,6 +49,8 @@ public:
 	}
 	
 	double eval() const override {
+		if (m_max == std::numeric_limits<double>::lowest())
+			return -1;
 		return m_max;
 	}
 	
