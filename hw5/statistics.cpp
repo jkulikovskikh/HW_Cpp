@@ -13,18 +13,13 @@ public:
 
 class Min : public IStatistics {
 public:
-	Min() : m_min{std::numeric_limits<double>::min()}, count{0} {
+	Min() : m_min{std::numeric_limits<double>::max()} {
 	}
 
 	void update(double next) override {
-		if (count == 0)
+		if (next < m_min) {
 			m_min = next;
-		else {
-			if (next < m_min) {
-				m_min = next;
-			}
 		}
-		count++;
 	}
 
 	double eval() const override {
@@ -37,24 +32,18 @@ public:
 
 private:
 	double m_min;
-	int count;
 };
 
 
 class Max : public IStatistics {
 public:
-	Max() : m_max{std::numeric_limits<double>::min()}, count{0} {
+	Max() : m_max{std::numeric_limits<double>::lowest()} {
 	}
 	
 	void update(double next) override {
-		if (count == 0)
+		if (next > m_max) {
 			m_max = next;
-		else {
-			if (next > m_max) {
-				m_max = next;
-			}
 		}
-		count++;
 	}
 	
 	double eval() const override {
@@ -67,23 +56,22 @@ public:
 	
 private:
 	double m_max;
-	int count;
 };
 
 
 class Mean : public IStatistics {
 public:
-	Mean() : m_mean{0.}, count{0} {
+	Mean() : m_sum{0.}, count{0} {
 	}
 		
 	void update(double next) override {
 		count++;
-		m_mean += next;
+		m_sum += next;
 	}
 		
 	double eval() const override {
 		if (count != 0) {
-			return m_mean / count;
+			return m_sum / count;
 		}
 		else 
 			return -1;
@@ -94,72 +82,34 @@ public:
 	}
 		
 	private:
-		double m_mean;
+		double m_sum;
 		int count;
 };
 
-// Класс Std, который наследуется только от IStatistics
+
 class Std : public IStatistics {
 public:
-	Std() : m_std{0.}, count{0}, m_mean{0.} {
-	}
-			
-	void update(double next) override {
-		count++;
-		m_mean += next;
-		values.push_back(next);
-	}
-			
-	double eval() const override {
-
-		if (count == 0) 
-			return -1;
-
-		m_mean = m_mean / count;
-		for(double val : values) {
-			m_std += std::pow((val - m_mean), 2);
-		}
-		m_std /= count;
-
-		return std::pow(m_std, 0.5);
-	}
-			
-	const char * name() const override {
-		return "std";
-	}
-			
-	private:
-		mutable double m_std;
-		mutable double m_mean;
-		std::vector<double> values;
-		int count;
-};
-
-// Класс Std, который наследуется от IStatistics и Mean
-/*
-class Std : public IStatistics, public Mean {
-public:
-	Std() : m_std{0.}, count{0} {
-		m_mean = new Mean{};
+	Std() : m_std{0.} {
 	}
 				
 	void update(double next) override {
-		count++;
-		m_mean->update(next);
+		m_mean.update(next);
 		values.push_back(next);
 	}
 				
 	double eval() const override {
+
+		double s(0.);
 	
-		if (count == 0) 
+		if (values.size() == 0) 
 			return -1;
 
 		for(double val : values) {
-			m_std += std::pow((val - m_mean->eval()), 2);
+			s += std::pow((val - m_mean.eval()), 2);
 		}
-		m_std /= count;
-	
-		return std::pow(m_std, 0.5);
+		s /= values.size();
+
+		return std::sqrt(s);
 	}
 				
 	const char * name() const override {
@@ -167,12 +117,10 @@ public:
 	}
 				
 	private:
-		mutable double m_std;
+		double m_std;
 		std::vector<double> values;
-		int count;
-		IStatistics *m_mean;
+		Mean m_mean;
 };
-*/
 
 int main() {
 
