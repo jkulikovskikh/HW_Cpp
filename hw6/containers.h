@@ -1,9 +1,8 @@
-
 template <typename T>
 class SerialContainer { 
 public:
 	SerialContainer() : m_size{0} {
-		T* m_region = new T{};
+		m_region = new T{};
 	}
 
 	// добавление нового элемента
@@ -13,14 +12,14 @@ public:
 
 	// вставка элемента в начало контейнера
 	void insert_to_begin(T value) {
-		int new_size = m_size + 1;
+		size_t new_size = m_size + 1;
 		T* new_region = new T[new_size]; 
 		new_region[0] = value; 			
-		for (int i = 1; i < new_size; ++i) {
+		for (size_t i = 1; i < new_size; ++i) {
 			new_region[i] = m_region[i - 1]; 		
 		}		
 		if (m_size != 0)
-			delete [] m_region; 				
+			delete [] m_region;			
 		m_region = new_region; 					
 		m_size = new_size; 							
 	}
@@ -28,27 +27,27 @@ public:
 	// вставка элемента в конец контейнера
 	void insert_to_end(T value) {
 		T* new_region = new T[m_size + 1]; 		
-		for (int i = 0; i < m_size; ++i) {
+		for (size_t i = 0; i < m_size; ++i) {
 			new_region[i] = m_region[i]; 		
 		}
 		new_region[m_size] = value; 			
 		if (m_size != 0)
-			delete [] m_region; 				
+			delete [] m_region;
 		m_region = new_region; 					
 		m_size += 1;  							
 	}
 
 	// вставка элемента в контейнер в произвольную позицию (на вход функции значение элемента и позиция)
-	void insert_to_position(T value, int pos) {
+	void insert_to_position(T value, size_t pos) {
 		if(pos > m_size + 1) {
 			std::cout << pos << " is not in the container. Insertion is not possible." << std::endl;
 		}
 		else {
-			int new_size = m_size + 1;
+			size_t new_size = m_size + 1;
 			T* new_region = new T[new_size]; 
 			new_region[pos] = value;
-			int shift = 0;			
-			for (int i = 0; i < new_size; ++i) {
+			size_t shift = 0;			
+			for (size_t i = 0; i < new_size; ++i) {
 				if (i == pos) {
 					shift = 1;
 					continue;
@@ -56,17 +55,17 @@ public:
 				new_region[i] = m_region[i - shift]; 		
 			}		
 			if (m_size != 0)
-				delete [] m_region; 				
+				delete [] m_region;				
 			m_region = new_region; 					
 			m_size = new_size; 		
 		}
 	}
 
 	// удаление элементов из контейнера (на вход функции - массив позиций элементов для удаления)
-	void erase_positions (int pos[], int size_pos) {
-		int size_ = 0;
-		for (int i = 0; i < size_pos; i++) {
-			if((pos[i] - 1) >= m_size) {
+	void erase_positions (size_t pos[], size_t size_pos) {
+		size_t size_ = 0;
+		for (size_t i = 0; i < size_pos; i++) {
+			if(pos[i] >= m_size) {
 				std::cout << pos[i] << " is not in the container. Remove is not possible." << std::endl;
 			}
 			else {
@@ -74,11 +73,11 @@ public:
 			}
 		}
 		if(size_ != 0) {
-			int new_size = m_size - size_;
+			size_t new_size = m_size - size_;
 			T* new_region = new T[new_size];
-			int k = 0;
-			int j = 0;
-			for (int i = 0; i < m_size; i++) {
+			size_t k = 0;
+			size_t j = 0;
+			for (size_t i = 0; i < m_size; i++) {
 				if (i == pos[j] - 1) {
 					j++;
 					continue;
@@ -86,21 +85,56 @@ public:
 				new_region[k] = m_region[i];
 				k++;
 			}
-			if (new_size != 0)
+			if (m_size > 1) 
 				delete [] m_region;
+			else 
+				delete m_region;
+			m_region = new_region; 					
+			m_size = new_size; 
+		}
+	}
+
+	// удаление элементов из контейнера (на вход функции - массив значений элементов для удаления)
+	void erase_values (T value[], size_t size_value) {
+		size_t size_ = 0;
+		for (size_t i = 0; i < size_value; i++) {
+			for (size_t j = 0; j < m_size; j++) {
+				if (value[i] == m_region[j]) {
+					size_ ++;
+					break;
+				}
+			}
+		}
+		if(size_ != 0) {
+			size_t new_size = m_size - size_;
+			T* new_region = new T[new_size];
+			size_t k = 0;
+			size_t j = 0;
+			for (size_t i = 0; i < m_size; i++) {
+				if (i == value[j]) {
+					j++;
+					continue;
+				}
+				new_region[k] = m_region[i];
+				k++;
+			}
+			if (m_size > 1) 
+				delete [] m_region;
+			else 
+				delete m_region;	
 			m_region = new_region; 					
 			m_size = new_size; 
 		}
 	}
 
 	// получение текущего размера контейнера
-	int size() const {
+	size_t size() const {
 			return m_size;
 		}
 
 	// вывод содержимого контейнера на экран
 	void print() const {
-		for (int i = 0; i < m_size; ++i) {
+		for (size_t i = 0; i < m_size; ++i) {
 			if (i != 0) std::cout << ' ';
 			std::cout <<  m_region[i];
 		}
@@ -108,11 +142,13 @@ public:
 
     ~SerialContainer() {
         if (m_size != 0)
-            delete [] m_region; 
+            delete [] m_region;
+		else
+			delete m_region;
     }
 
 private:
-	int m_size;
+	size_t m_size;
 	T* m_region;
 };
 
@@ -180,12 +216,18 @@ public:
 	} 
 
 	// удаление элементов из контейнера (на вход функции - массив значений элементов для удаления)
-	void erase_values (T value[], int size_value) {
-		for (int i = 0; i < size_value; i++) {
+	void erase_values (T value[], size_t size_value) {
+		for (size_t i = 0; i < size_value; i++) {
 			for (Node *m_node = m_first; m_node!= m_last; m_node = m_node->next) {
 				if (m_node -> data == value[i]) {
-					m_node->prev->next = m_node->next;
-					m_node->next->prev = m_node->prev;
+					if(m_first -> data != value[i]) {
+						m_node->prev->next = m_node->next;
+						m_node->next->prev = m_node->prev;
+					}
+					else {
+						m_first = m_node->next;
+						m_first->prev = 0;
+					}
 					delete m_node;
 					m_size -= 1;
 					break;
@@ -195,13 +237,12 @@ public:
 	}
 
 	// получение текущего размера контейнера
-	int size() const {
+	size_t size() const {
 		return m_size;
 	} 
 
 	// вывод содержимого контейнера на экран
 	void print() const {
-	
 		for (Node *m_node = m_first; m_node!= m_last; m_node = m_node->next) {
 			std::cout << m_node->data << " " ;
 		}
@@ -219,7 +260,7 @@ public:
 	}
 
 private:
-	int m_size;
+	size_t m_size;
 
 	struct Node {
 		Node* next; 			

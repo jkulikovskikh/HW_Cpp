@@ -21,9 +21,9 @@ void test_serial_container() {
 	// Вывод размера контейнера на экран
 	std::cout << container_serial.size() << std::endl;
 
-	// Удаление третьего (по счёту), пятого и седьмого элементов 
-	int pos[3] = {3, 5, 7};
-	container_serial.erase_positions(pos, std::size(pos));
+	// Удаление третьего (по счёту), пятого и седьмого элементов (по хранимому объекту)
+	int value[3] = {2, 4, 6};
+	container_serial.erase_values(value, std::size(value));
 	// Вывод содержимого контейнера на экран 
 	container_serial.print();
 	std::cout << std::endl;
