@@ -40,6 +40,28 @@ TEST(List, CreateContainer) {
     EXPECT_EQ(list.size(), 0);
 }
 
+// Проверка выброса исключения при создании контейнера с невалидным размером
+TEST(List, CreateContainerThrowExpection) {
+    
+    EXPECT_THROW(hw::MyList<int> list(0), std::invalid_argument);
+}
+
+// Проверка создания контейнера без выброса исключения
+TEST(List, CreateContainerWithoutThrowExpection) {
+    
+    EXPECT_NO_THROW(hw::MyList<int> list(1));
+    EXPECT_NO_THROW(hw::MyList<int> list);
+}
+
+// Проверка создания контейнера определенного размера
+TEST(List, CreateContainerWithMaxSize) {
+
+    size_t max_size = 3;
+    hw::MyList<int> list(max_size);
+
+    EXPECT_EQ(list.size(), max_size);
+}
+
 // Вставка нескольких элементов в пустой контейнер
 TEST(List, InsertElements) {
     std::list<int> list;
@@ -76,6 +98,14 @@ TEST_F(ListFixture, InsertToEnd) {
 
     EXPECT_EQ(list.size(), 11);
     EXPECT_EQ(list.back(), 5);
+
+    size_t elements = -1;
+    for (auto iter = list.begin(); iter != list.end(); ++iter) {
+        if (iter != --list.end()) {
+            elements ++;
+            EXPECT_EQ(*iter , elements);
+        }     
+    }
 }
 
 // Вставка элемента в начало
@@ -87,6 +117,14 @@ TEST_F(ListFixture, InsertToBegin) {
 
     EXPECT_EQ(list.size(), 11);
     EXPECT_EQ(list.front(), 5);
+
+    size_t elements = -1;
+    for (auto iter = list.begin(); iter != list.end(); ++iter) {
+        if (iter != list.begin()) {
+            elements ++;
+            EXPECT_EQ(*iter , elements);
+        }     
+    }
 }
 
 // Вставка элемента в середину
@@ -104,10 +142,16 @@ TEST_F(ListFixture, InsertToMiddle) {
     }
 
     EXPECT_EQ(list.size(), 11);
+
+    size_t elements = -1;
     for (auto iter = list.begin(); iter != list.end(); ++iter) { 
         if (*iter == iter_middle) {
             EXPECT_TRUE(*(++iter) == value);
-            break;
+            elements++;
+        }
+        else {
+            elements ++;
+            EXPECT_EQ(*iter , elements);
         }
     }
 }
@@ -130,6 +174,12 @@ TEST_F(ListFixture, EraseFromBegin) {
 
     EXPECT_EQ(list.size(), 9);
     EXPECT_EQ(list.front(), 1);
+
+    size_t elements = 0;
+    for (auto iter = list.begin(); iter != list.end(); ++iter) {
+            elements ++;
+            EXPECT_EQ(*iter , elements);  
+    }
 }
 
 // Удаление элементов из середины
@@ -137,6 +187,7 @@ TEST_F(ListFixture, EraseFromMiddle) {
     std::cout << "Test body" << std::endl;
    
     auto iter_middle = 5;
+
     for (auto iter = list.begin(); iter != list.end(); ++iter) {
         if (*iter == iter_middle) {
             list.erase(iter);
@@ -145,10 +196,15 @@ TEST_F(ListFixture, EraseFromMiddle) {
     }
    
     EXPECT_EQ(list.size(), 9);
+
+    size_t elements = -1;
     for (auto iter = list.begin(); iter != list.end(); ++iter) {
         if (*iter == 4) {
             EXPECT_TRUE(*(++iter) != iter_middle);
+            elements += 2;
         }
+        elements ++;
+        EXPECT_EQ(*iter , elements);
     }
 }
 

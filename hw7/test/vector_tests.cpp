@@ -36,11 +36,34 @@ struct VectorFixture : public testing::Test {
 // Создание контейнера
 TEST(Vector, CreateContainer) {
     std::vector<int> vector;
+
     const size_t expectedZeroSize = 0;
 
     const auto curSize = vector.size();
 
     EXPECT_EQ(curSize, expectedZeroSize);
+}
+
+// Проверка выброса исключения при создании контейнера с невалидным размером
+TEST(Vector, CreateContainerThrowExpection) {
+    
+    EXPECT_THROW(hw::MyVector<int> vector(0), std::invalid_argument);
+}
+
+// Проверка создания контейнера без выброса исключения
+TEST(Vector, CreateContainerWithoutThrowExpection) {
+
+    EXPECT_NO_THROW(hw::MyVector<int> vector);
+    EXPECT_NO_THROW(hw::MyVector<int> vector(1));
+}
+
+// Проверка создания контейнера определенного размера
+TEST(Vector, CreateContainerWithMaxSize) {
+
+    size_t max_size = 3;
+    hw::MyVector<int> vector(max_size);
+
+    EXPECT_EQ(vector.size(), max_size);
 }
 
 // Вставка нескольких элементов в пустой контейнер
@@ -79,6 +102,14 @@ TEST_F(VectorFixture, InsertToEnd) {
 
     EXPECT_EQ(vector.size(), 11);
     EXPECT_EQ(vector.back(), 5);
+
+    size_t elements = -1;
+    for (auto iter = vector.begin(); iter != vector.end(); ++iter) {
+        if (iter != --vector.end()) {
+            elements ++;
+            EXPECT_EQ(*iter , elements);
+        }     
+    }
 }
 
 // Вставка элемента в начало
@@ -91,6 +122,14 @@ TEST_F(VectorFixture, InsertToBegin) {
 
     EXPECT_EQ(vector.size(), 11);
     EXPECT_EQ(vector.front(), 5);
+
+    size_t elements = -1;
+    for (auto iter = vector.begin(); iter != vector.end(); ++iter) {
+        if (iter != vector.begin()) {
+            elements ++;
+            EXPECT_EQ(*iter , elements);
+        }     
+    }
 }
 
 // Вставка элемента в середину
@@ -109,10 +148,15 @@ TEST_F(VectorFixture, InsertToMiddle) {
 
     EXPECT_EQ(vector.size(), 11);
 
+    size_t elements = -1;
     for (auto iter = vector.begin(); iter != vector.end(); ++iter) { 
         if (*iter == iter_middle) {
             EXPECT_TRUE(*(++iter) == value);
-            break;
+            elements ++;
+        }
+        else {
+            elements ++;
+            EXPECT_EQ(*iter , elements);
         }
     }
 }
@@ -137,6 +181,12 @@ TEST_F(VectorFixture, EraseFromBegin) {
 
     EXPECT_EQ(vector.size(), 9);
     EXPECT_EQ(vector.front(), 1);
+
+    size_t elements = 0;
+    for (auto iter = vector.begin(); iter != vector.end(); ++iter) {
+            elements ++;
+            EXPECT_EQ(*iter , elements);  
+    }
 }
 
 // Удаление элементов из середины
@@ -153,10 +203,14 @@ TEST_F(VectorFixture, EraseFromMiddle) {
    
     EXPECT_EQ(vector.size(), 9);
 
+    size_t elements = -1;
     for (auto iter = vector.begin(); iter != vector.end(); ++iter) {
         if (*iter == 4) {
             EXPECT_TRUE(*(++iter) != iter_middle);
+            elements += 2;
         }
+        elements ++;
+        EXPECT_EQ(*iter , elements);
     }
 }
 
@@ -173,6 +227,12 @@ TEST_F(VectorFixture, GetElements) {
     }
  
     EXPECT_EQ(size_container, elementCount);
+
+    value = 0;
+    for (int i = 0; i < elementCount; ++i) {
+        EXPECT_EQ(vector[i] , value);
+        value++;
+    }
 }
 
 // Получение размера контейнера (фактическое количество элементов)
