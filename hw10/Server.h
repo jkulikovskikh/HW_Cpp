@@ -18,9 +18,12 @@ private:
     void handle_client(std::shared_ptr<tcp::socket> socket);    
     // Отправка сообщения клиентам
     void broadcast_message(const std::string& message, std::shared_ptr<tcp::socket> sender); 
+    // Отправка клиенту гаммы
+    void send_gamma(std::shared_ptr<tcp::socket> socket);
 
     tcp::acceptor acceptor_;
     std::vector<std::shared_ptr<tcp::socket>> clients_; // список клиентов
     std::vector<std::thread> threads_; // вектор для хранения потоков
     bool flag_close_; // флаг закрытия сервера
+    std::string gamma; // гамма
 };

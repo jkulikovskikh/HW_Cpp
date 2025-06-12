@@ -13,6 +13,7 @@
 // Константы
 const std::string LOG_FILENAME =  "log.txt";
 const std::string NAME_SERVER = "server";
+const size_t SIZE_GAMMA = 1024;
 
 // Функция генерации гаммы
 std::string gamma_generate(std::size_t length);

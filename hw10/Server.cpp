@@ -5,6 +5,8 @@ Server::Server(asio::io_context& io_context, const int port)
     flag_close_(false) {
     acceptor_.listen();
     std::cout << "Сервер подключен. Ожидание подключения клиента." << std::endl;
+    
+    gamma = gamma_generate(SIZE_GAMMA);  // генерация длинной гаммы, общей для всех клиентов
 }
 
 void Server::run() {
@@ -12,6 +14,8 @@ void Server::run() {
         try {
             auto socket = std::make_shared<tcp::socket>(acceptor_.accept());
             std::cout << "Новый клиент подключился!" << std::endl;
+
+            send_gamma(socket);
 
             // Обрабатываем подключение клиента в новом потоке
             threads_.emplace_back(&Server::handle_client, this, socket); 
@@ -23,13 +27,29 @@ void Server::run() {
     }
 }
 
-void Server::stop() {
-    flag_close_ = true;
+void Server::send_gamma(std::shared_ptr<tcp::socket> socket) {
     try {
-        std::cout << "Сервер закрыт." << std::endl;
+        // Отправляем
+        uint32_t gamma_length = htonl(static_cast<uint32_t>(gamma.size()));
+        asio::write(*socket, asio::buffer(&gamma_length, 4));
+        asio::write(*socket, asio::buffer(gamma.data(), gamma.size())); 
+    } catch (std::exception& e) {
+        std::cout << "Ошибка при отправке гаммы клиенту: " << e.what() << std::endl;
+    }
+}
+
+void Server::stop() {
+    try {
+        if (clients_.size() == 0) {
+            std::cout << "Сервер закрыт." << std::endl;
+        }
+        else {
+            std::cout << "Сервер будет закрыт после отключения всех клиентов." << std::endl;
+        }
+        flag_close_ = true;
         acceptor_.close(); // Закрываем сервер
     } catch (const std::exception& e) {
-        std::cout << "Ошибка в закрытии acceptor." << std::endl;
+        std::cout << "Ошибка в закрытии сервера." << std::endl;
     }
 }
 
@@ -40,6 +60,7 @@ void Server::handle_client(std::shared_ptr<tcp::socket> socket) {
         try {
             // Читаем
             char length_buf[4];
+
             asio::read(*socket, asio::buffer(length_buf, 4));
             uint32_t msg_length = ntohl(*reinterpret_cast<uint32_t*>(length_buf));
 
@@ -49,19 +70,22 @@ void Server::handle_client(std::shared_ptr<tcp::socket> socket) {
            
             // Печатаем сообщение от клиента
             log_message("[encrypted]: " + encrypted_msg, "received", "server");
-    
+            
             // Отправляем это сообщение всем остальным клиентам
             broadcast_message(encrypted_msg, socket);
 
         } catch (std::exception& e) {
             std::cout << "Ошибка при чтении сообщения от клиента: " << e.what() << std::endl;
-            // Удаляем клиента, если он отключился
-            clients_.erase(std::remove(clients_.begin(), clients_.end(), socket), clients_.end());
             break;
-        }    
-    }  
+        }  
+    }
+    // Удаляем клиента, если он отключился
+    clients_.erase(std::remove(clients_.begin(), clients_.end(), socket), clients_.end());  
     socket->close();
     std::cout << "Клиент отключился." << std::endl;
+    if (clients_.size() == 0 && flag_close_) {
+         std::cout << "Сервер закрыт." << std::endl;
+    }
 }
 
 void Server::broadcast_message(const std::string& message, std::shared_ptr<tcp::socket> sender) {
@@ -77,7 +101,7 @@ void Server::broadcast_message(const std::string& message, std::shared_ptr<tcp::
                 log_message("[encrypted]: " + message, "sent", "server");
 
             } catch (std::exception& e) {
-                std::cerr << "Ошибка при отправке сообщения клиенту: " << e.what() << std::endl;
+                std::cout << "Ошибка при отправке сообщения клиенту: " << e.what() << std::endl;
             }
         }
     }

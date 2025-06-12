@@ -2,12 +2,13 @@
 #include <string>
 #include <cctype>
 
-Client::Client(asio::io_context& io_context, const std::string& ip, const int port, const std::string& name)
+Client::Client(asio::io_context& io_context, const std::string& ip, const int port, 
+        const std::string& name)
     : socket_(io_context) { 
     try {
         username = name;
         for (size_t i = 0; i < name.size(); ++i) {
-            username[i] = std::tolower(static_cast<unsigned char>(username[i]));
+            username[i] = std::tolower(static_cast<char>(username[i]));
         }
         if (username == NAME_SERVER) {
             std::cout << "Клиент не может иметь имя " << NAME_SERVER << 
@@ -26,7 +27,10 @@ Client::Client(asio::io_context& io_context, const std::string& ip, const int po
 }
 
 void Client::run() {
-   // Запускаем поток для приема сообщений
+    // Чтение гаммы
+    receive_gamma();
+
+    // Запускаем поток для приема сообщений
     std::thread read_thread(&Client::receive_message, this);
 
     send_message();
@@ -34,10 +38,22 @@ void Client::run() {
     read_thread.join();
 }
 
+void Client::receive_gamma() {
+    char length_buf[4];
+    asio::read(socket_, asio::buffer(length_buf, 4));
+    uint32_t gamma_length = ntohl(*reinterpret_cast<uint32_t*>(length_buf));
+
+    std::vector<char> buf(gamma_length);
+    asio::read(socket_, asio::buffer(buf.data(), gamma_length));
+    std::string gamma(buf.begin(), buf.end());
+
+    key = gamma;
+}
+
 void Client::receive_message() {
     while (true) {
         try {
-             // Читаем
+            // Читаем
             char length_buf[4];
             asio::read(socket_, asio::buffer(length_buf, 4));
             uint32_t msg_length = ntohl(*reinterpret_cast<uint32_t*>(length_buf));
@@ -47,14 +63,13 @@ void Client::receive_message() {
             std::string msg(buf.begin(), buf.end());
 
             // Расшифровываем
-            std::string key = gamma_generate(msg.size());
             std::string decrypted_msg = gamma_cipher(msg, key); 
 
             std::cout << "Получено: " << decrypted_msg << std::endl;
             log_message("[decrypted]: " + decrypted_msg, "received", username);
 
         } catch (std::exception& e) {
-            std::cerr << "Ошибка при получении сообщения: " << e.what() << std::endl;
+            std::cout << "Ошибка при получении сообщения: " << e.what() << std::endl;
             break; 
         }
     }
@@ -70,7 +85,6 @@ void Client::send_message() {
         if (!msg.empty() && msg != "q") {
             try {
                 // Зашифровываем
-                std::string key = gamma_generate(msg.size());
                 std::string encrypted_msg = gamma_cipher(msg, key); 
 
                 log_message("[decrypted]: " + msg, "sent", username);
@@ -82,8 +96,8 @@ void Client::send_message() {
                 asio::write(socket_, asio::buffer(encrypted_msg.data(), encrypted_msg.size())); 
 
             } catch (std::exception& e) {
-                std::cerr << "Ошибка при отправлении сообщения: " << e.what() << std::endl;
-                break; // Выходим из цикла при ошибке
+                std::cout << "Ошибка при отправлении сообщения: " << e.what() << std::endl;
+                break; 
             }
         } 
         else {
