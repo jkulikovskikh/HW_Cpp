@@ -16,7 +16,7 @@ std::string gamma_generate(std::size_t length) {
 std::string gamma_cipher(const std::string& data, const std::string& key) {
     std::string result = data;
     for(size_t i = 0; i < data.size(); ++i) {
-        result[i] = data[i] ^ key[i];
+        result[i] = data[i] ^ key[i % key.size()];
     }
     return result;
 }; 
